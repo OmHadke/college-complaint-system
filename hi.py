@@ -1,3 +1,3 @@
 print("Hi there!\n")
 print("Welcome to the Python world.")
-print("Let's code something amazing together!")
+print("Let us code something amazing together!")
