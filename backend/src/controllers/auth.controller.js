@@ -51,8 +51,8 @@ exports.login = async (req, res) => {
 
     res.cookie("token", token, {
       httpOnly: true,
-      sameSite: "strict",
-      secure: process.env.NODE_ENV === "production",
+      sameSite: "none",
+      secure: true,
       maxAge: 24 * 60 * 60 * 1000 // 1 day
     });
 
@@ -70,12 +70,27 @@ exports.login = async (req, res) => {
   }
 };
 
+//Getme
+exports.getMe = async (req, res) => {
+  res.status(200).json({
+    id: req.user._id,
+    name: req.user.name,
+    email: req.user.email,
+    role: req.user.role,
+  });
+};
+
+
+
+
 // Logout
 exports.logout = (req, res) => {
   res.cookie("token", "", {
     httpOnly: true,
+    sameSite: "none",
+    secure: true,
     expires: new Date(0)
-  });
+});
 
   res.status(200).json({ message: "Logged out successfully" });
 };

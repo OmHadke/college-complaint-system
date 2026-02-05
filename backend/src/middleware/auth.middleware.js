@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
+const User = require("../models/User"); // ← ADD THIS(solved /admin issue)
 
-exports.protect = (req, res, next) => {
+exports.protect = async (req, res, next) => {
   const token = req.cookies?.token;
 
   if (!token) {
@@ -9,7 +10,7 @@ exports.protect = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // { id, role, iat, exp }
+    req.user = await User.findById(decoded.id).select("-password");//decoded;// { id, role, iat, exp }
     next();
   } catch (error) {
     return res.status(401).json({ message: "Token invalid or expired" });
