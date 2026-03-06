@@ -1,89 +1,63 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import api from "../api/axios";
+import { Link, useNavigate } from "react-router-dom";
+import { registerUser } from "../api/auth";
 
 export default function Register() {
   const navigate = useNavigate();
-
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    password: "",
-    role: "student",
-  });
-
+  const [form, setForm] = useState({ name: "", email: "", password: "", role: "student" });
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     setError("");
-    setLoading(true);
+    setSubmitting(true);
 
     try {
-      await api.post("/api/auth/register", form);
-      navigate("/login");
+      await registerUser(form);
+      navigate("/login", { replace: true });
     } catch (err) {
-      setError(err.response?.data?.message || "Registration failed");
+      setError(err.response?.data?.message || "Unable to register.");
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
 
   return (
-    <div>
-      <h2>Register</h2>
+    <div className="auth-page">
+      <form className="auth-card" onSubmit={handleSubmit}>
+        <p className="eyebrow">Get started</p>
+        <h2>Create your student account</h2>
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
+        {error && <p className="error-message">{error}</p>}
 
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          name="name"
-          placeholder="Name"
-          value={form.name}
-          onChange={handleChange}
-          required
-        />
+        <label>
+          Full Name
+          <input name="name" value={form.name} onChange={handleChange} required />
+        </label>
 
-        <br />
+        <label>
+          College Email
+          <input type="email" name="email" value={form.email} onChange={handleChange} required />
+        </label>
 
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={form.email}
-          onChange={handleChange}
-          required
-        />
+        <label>
+          Password
+          <input type="password" name="password" value={form.password} onChange={handleChange} required minLength={6} />
+        </label>
 
-        <br />
-
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={form.password}
-          onChange={handleChange}
-          required
-        />
-
-        <br />
-
-        <select name="role" value={form.role} onChange={handleChange}>
-          <option value="student">Student</option>
-          
-        </select>
-
-        <br />
-
-        <button type="submit" disabled={loading}>
-          {loading ? "Registering..." : "Register"}
+        <button disabled={submitting} type="submit">
+          {submitting ? "Creating account..." : "Create account"}
         </button>
+
+        <p className="muted small">
+          Already registered? <Link to="/login">Sign in</Link>
+        </p>
       </form>
     </div>
   );

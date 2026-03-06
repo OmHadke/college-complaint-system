@@ -1,37 +1,61 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import AppShell from "../components/AppShell";
 import { getMyComplaints } from "../api/complaint";
 
-const MyComplaints = () => {
+const FILTERS = ["all", "pending", "in_progress", "resolved"];
+
+export default function MyComplaints() {
   const [complaints, setComplaints] = useState([]);
+  const [activeFilter, setActiveFilter] = useState("all");
 
   useEffect(() => {
     const fetchComplaints = async () => {
-      try {
-        const res = await getMyComplaints();
-        setComplaints(res.data.complaints);
-      } catch (error) {
-        console.error(error);
-      }
+      const { data } = await getMyComplaints();
+      setComplaints(data.complaints || []);
     };
+
     fetchComplaints();
   }, []);
 
+  const filteredComplaints = useMemo(() => {
+    if (activeFilter === "all") {
+      return complaints;
+    }
+
+    return complaints.filter((item) => item.status === activeFilter);
+  }, [activeFilter, complaints]);
+
   return (
-    <div>
-      <h2>My Complaints</h2>
+    <AppShell title="My Complaints">
+      <div className="tabs">
+        {FILTERS.map((filter) => (
+          <button
+            key={filter}
+            onClick={() => setActiveFilter(filter)}
+            className={activeFilter === filter ? "tab active" : "tab"}
+            type="button"
+          >
+            {filter.replace("_", " ")}
+          </button>
+        ))}
+      </div>
 
-      {complaints.length === 0 && <p>No complaints yet</p>}
-
-      {complaints.map((c) => (
-        <div key={c._id} style={{ border: "1px solid #ccc", margin: "10px" }}>
-          <h4>{c.title}</h4>
-          <p>{c.description}</p>
-          <p>Category: {c.category}</p>
-          <p>Status: {c.status}</p>
-        </div>
-      ))}
-    </div>
+      <section className="panel">
+        {filteredComplaints.length === 0 ? (
+          <p className="muted">No complaints in this category.</p>
+        ) : (
+          filteredComplaints.map((complaint) => (
+            <article key={complaint._id} className="list-item stacked">
+              <div>
+                <h3>{complaint.title}</h3>
+                <p>{complaint.description}</p>
+                <p className="muted">Category: {complaint.category}</p>
+              </div>
+              <span className={`status-badge ${complaint.status}`}>{complaint.status.replace("_", " ")}</span>
+            </article>
+          ))
+        )}
+      </section>
+    </AppShell>
   );
-};
-
-export default MyComplaints;
+}

@@ -1,10 +1,16 @@
 import axios from "axios";
 
-const api = axios.create({
-  baseURL: "https://special-telegram-x5grwgw975v3rgg-5000.app.github.dev/",
-  withCredentials: true, //  REQUIRED for cookies
-});
+const baseURL =
+  import.meta.env.VITE_API_BASE_URL ||
+  "https://special-telegram-x5grwgw975v3rgg-5000.app.github.dev";
 
-api.defaults.headers.common["Accept"] = "application/json";
+const api = axios.create({
+  baseURL,
+  withCredentials: true,
+  headers: {
+    Accept: "application/json",
+    "Content-Type": "application/json",
+  },
+});
 
 export default api;

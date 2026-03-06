@@ -1,11 +1,10 @@
 import api from "./axios";
 
-// Create complaint
-export const createComplaint = (data) => {
-  return api.post("/api/complaints", data);
-};
+export const createComplaint = (payload) => api.post("/api/complaints", payload);
 
-// Get my complaints
-export const getMyComplaints = () => {
-  return api.get("/api/complaints/my");
-};
+export const getMyComplaints = () => api.get("/api/complaints/my");
+
+export const getAllComplaints = () => api.get("/api/admin/complaints");
+
+export const updateComplaintStatus = (id, status) =>
+  api.put(`/api/admin/complaints/${id}`, { status });
